@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AstroNova | Пульс Вселенной</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap');
+
+        :root {
+            --bg-color: #05050a;
+            --text-main: #e0e0e0;
+            --neon-blue: #00f3ff;
+            --neon-purple: #bc13fe;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-hover: rgba(0, 243, 255, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(188, 19, 254, 0.1), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(0, 243, 255, 0.1), transparent 25%);
+            color: var(--text-main);
+            font-family: 'Roboto', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Звёздный фон */
+        .stars {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            background: black;
+            pointer-events: none;
+        }
+        .stars::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 50px 160px, #ddd, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 130px 80px, #fff, rgba(0,0,0,0));
+            background-repeat: repeat;
+            background-size: 200px 200px;
+            opacity: 0.3;
+        }
+
+        /* Шапка */
+        header {
+            text-align: center;
+            padding: 50px 20px 30px;
+        }
+        header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            color: #fff;
+            text-shadow: 0 0 10px var(--neon-blue), 0 0 30px var(--neon-blue);
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+        header p {
+            font-size: 1.1rem;
+            color: #aaa;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Навигация */
+        nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .nav-btn {
+            background: transparent;
+            color: #fff;
+            text-decoration: none;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            padding: 10px 20px;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+        }
+        .nav-btn:hover, .nav-btn.active {
+            border-color: var(--neon-purple);
+            background: rgba(188, 19, 254, 0.1);
+            box-shadow: 0 0 15px rgba(188, 19, 254, 0.4);
+            color: var(--neon-purple);
+            text-shadow: 0 0 5px var(--neon-purple);
+        }
+
+        /* Основной контейнер вкладок */
+        main {
+            flex: 1;
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease forwards;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 30px;
+            text-align: center;
+            color: #fff;
+            text-shadow: 0 0 10px var(--neon-purple);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        /* Карточки */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(5px);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--neon-blue), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.5s ease;
+        }
+        .card:hover::before {
+            transform: translateX(100%);
+        }
+        .card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(0, 243, 255, 0.3);
+            box-shadow: 0 15px 30px rgba(0, 243, 255, 0.15);
+            background: var(--card-hover);
+        }
+        
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .card-date {
+            font-size: 0.8rem;
+            color: var(--neon-blue);
+            font-family: 'Orbitron', sans-serif;
+        }
+        .card-tag {
+            font-size: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 10px;
+            background: rgba(188, 19, 254, 0.15);
+            color: var(--neon-purple);
+            border: 1px solid rgba(188, 19, 254, 0.3);
+        }
+        .card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 12px;
+            color: #fff;
+        }
+        .card p {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #bbb;
+            margin-bottom: 20px;
+        }
+        .read-more {
+            color: var(--neon-blue);
+            font-size: 0.9rem;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Админка / Форма добавления */
+        .admin-panel {
+            background: rgba(10, 10, 20, 0.8);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 700px;
+            margin: 0 auto;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.05);
+        }
+        .admin-panel h3 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--neon-blue);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: #fff;
+            font-family: 'Roboto', sans-serif;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+        }
+        .form-group textarea {
+            resize: vertical;
+            height: 120px;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            color: #000;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: opacity 0.3s, box-shadow 0.3s;
+        }
+        .submit-btn:hover {
+            opacity: 0.9;
+            box-shadow: 0 0 20px var(--neon-blue);
+        }
+
+        /* Страница О проекте */
+        .about-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+            color: #ccc;
+        }
+        .about-card h3 {
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+        .about-card p {
+            margin-bottom: 15px;
+        }
+
+        /* Модальное окно */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal {
+            background: #090914;
+            border: 1px solid var(--neon-blue);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 700px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 0 40px rgba(0, 243, 255, 0.2);
+            position: relative;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.open .modal {
+            transform: scale(1);
+        }
+        .modal-close {
+            position: absolute;
+            top: 20px; right: 20px;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .modal-close:hover {
+            color: var(--neon-blue);
+        }
+        .modal-date {
+            color: var(--neon-blue);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+        }
+        .modal h2 {
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+        }
+        .modal-body {
+            color: #ddd;
+            line-height: 1.7;
+            font-size: 1.05rem;
+        }
+
+        /* Футер */
+        footer {
+            text-align: center;
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.6);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.9rem;
+            color: #777;
+            margin-top: auto;
+        }
+
+        @media (max-width: 600px) {
+            header h1 { font-size: 2.2rem; }
+            .modal { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars"></div>
+
+    <header>
+        <h1>AstroNova</h1>
+        <p>Интерактивный портал о космосе, астрономии и фундаментальной астрофизике.</p>
+    </header>
+
+    <nav>
+        <button class="nav-btn active" onclick="switchTab('home')">Главная</button>
+        <button class="nav-btn" onclick="switchTab('news')">Новости</button>
+        <button class="nav-btn" onclick="switchTab('astro')">Астрофизика</button>
+        <button class="nav-btn" onclick="switchTab('admin')">Панель управления</button>
+        <button class="nav-btn" onclick="switchTab('about')">О проекте</button>
+    </nav>
+
+    <main>
+        <!-- Вкладка: Главная -->
+        <div id="home" class="tab-content active">
+            <h2 class="section-title">Главные события космоса</h2>
+            <div id="home-grid" class="grid">
+                <!-- Динамически заполняется из JS -->
+            </div>
+        </div>
+
+        <!-- Вкладка: Новости астрономии -->
+        <div id="news" class="tab-content">
+            <h2 class="section-title">Новости астрономии</h2>
+            <div id="news-grid" class="grid"></div>
+        </div>
+
+        <!-- Вкладка: Астрофизика -->
+        <div id="astro" class="tab-content">
+            <h2 class="section-title">Разделы астрофизики</h2>
+            <div id="astro-grid" class="grid"></div>
+        </div>
+
+        <!-- Вкладка: Панель управления (Добавление статей) -->
+        <div id="admin" class="tab-content">
+            <div class="admin-panel">
+                <h3>Добавить новую статью</h3>
+                <form id="article-form" onsubmit="handleFormSubmit(event)">
+                    <div class="form-group">
+                        <label for="art-title">Заголовок статьи</label>
+                        <input type="text" id="art-title" required placeholder="Например: Новая экзопланета...">
+                    </div>
+                    <div class="form-group">
+                        <label for="art-category">Категория / Раздел</label>
+                        <select id="art-category">
+                            <option value="news">Новости астрономии</option>
+                            <option value="astro">Астрофизика</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="art-desc">Краткое описание (для карточки)</label>
+                        <textarea id="art-desc" required placeholder="Пару вводных предложений..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="art-full">Полный текст статьи</label>
+                        <textarea id="art-full" required style="height: 180px;" placeholder="Детальное описание исследования или материала..."></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">Опубликовать во Вселенную</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Вкладка: О проекте -->
+        <div id="about" class="tab-content">
+            <div class="about-card">
+                <h3>О проекте AstroNova</h3>
+                <p>AstroNova создана для всех, кто устремлен ввысь и хочет изучать тайны космоса в удобном, современном и адаптивном интерфейсе.</p>
+                <p>Здесь вы найдете свежие космические открытия, разборы физических явлений и сможете вести собственную базу астрономических заметок.</p>
+                <p style="color: var(--neon-blue); margin-top: 20px;">💡 Все добавленные вами статьи сохраняются локально в памяти устройства и никуда не пропадут при перезагрузке.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Модальное окно чтения -->
+    <div id="article-modal" class="modal-overlay" onclick="closeModalOutside(event)">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <div id="modal-date" class="modal-date"></div>
+            <h2 id="modal-title"></h2>
+            <div id="modal-body" class="modal-body"></div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 AstroNova. Работает на localStorage &amp; Passion for Space.</p>
+    </footer>
+
+    <script>
+        // Базовые стартовые статьи
+        const defaultArticles = [
+            {
+                id: 1,
+                title: "Секреты тёмной материи",
+                category: "news",
+                date: "08.10.2026",
+                desc: "Новейшие данные с телескопа Джеймса Уэбба позволяют пересмотреть стандартную космологическую модель.",
+                fullText: "Новейшие данные с телескопа Джеймса Уэбба позволяют пересмотреть стандартную космологическую модель. Исследователи фиксируют аномалии в распределении звёздных скоплений, что указывает на возможное существование скрытых гравитационных полей, неподчиняющихся привычной барионной физике. Кажется, мы в шаге от понимания реальной структуры гало тёмной материи."
+            },
+            {
+                id: 2,
+                title: "Слияние чёрных дыр",
+                category: "news",
+                date: "05.10.2026",
+                desc: "Детекторы LIGO зафиксировали гравитационные волны колоссальной мощности.",
+                fullText: "Детекторы LIGO и Virgo зафиксировали гравитационные волны колоссальной мощности от столкновения двух сверхмассивных чёрных дыр в созвездии Андромеды. Выброс энергии в виде гравитационного излучения за доли секунды превысил светимость всех видимых звезд во Вселенной вместе взятых."
+            },
+            {
+                id: 3,
+                title: "Квантовая гравитация и горизонт событий",
+                category: "astro",
+                date: "01.10.2026",
+                desc: "Как совместить общую теорию относительности Эйнштейна и квантовую механики?",
+                fullText: "Одна из главных проблем современной астрофизики — объединение гравитации и квантовой теории. На микроуровне квантовые флуктуации пространства-времени создают хаос, в то время как на макроуровне Эйнштейновская геометрия работает безупречно. Понимание физики внутри горизонта событий чёрных дыр может стать ключом к теории всего."
+            }
+        ];
+
+        // Получение статей из localStorage или инициализация дефолтными
+        function getArticles() {
+            const saved = localStorage.getItem('astronova_articles');
+            if (!saved) {
+                localStorage.setItem('astronova_articles', JSON.stringify(defaultArticles));
+                return defaultArticles;
+            }
+            try {
+                return JSON.parse(saved);
+            } catch (e) {
+                return defaultArticles;
+            }
+        }
+
+        // Рендеринг контента по вкладкам
+        function renderContent() {
+            const articles = getArticles();
+            const homeGrid = document.getElementById('home-grid');
+            const newsGrid = document.getElementById('news-grid');
+            const astroGrid = document.getElementById('astro-grid');
+
+            homeGrid.innerHTML = '';
+            newsGrid.innerHTML = '';
+            astroGrid.innerHTML = '';
+
+            // Сортируем от новых к старым
+            const sorted = [...articles].reverse();
+
+            sorted.forEach(art => {
+                const cardHTML = `
+                    <article class="card" onclick="openArticle(${art.id})">
+                        <div>
+                            <div class="card-meta">
+                                <span class="card-date">${art.date}</span>
+                                <span class="card-tag">${art.category === 'news' ? 'Новости' : 'Астрофизика'}</span>
+                            </div>
+                            <h3>${art.title}</h3>
+                            <p>${art.desc}</p>
+                        </div>
+                        <div class="read-more">Читать далее &rarr;</div>
+                    </article>
+                `;
+
+                // На главную выводим все
+                homeGrid.innerHTML += cardHTML;
+
+                if (art.category === 'news') {
+                    newsGrid.innerHTML += cardHTML;
+                } else if (art.category === 'astro') {
+                    astroGrid.innerHTML += cardHTML;
+                }
+            });
+        }
+
+        // Переключение вкладок
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+
+            document.getElementById(tabId).classList.add('active');
+            
+            // Находим кнопку по тексту или атрибуту
+            event && event.target && event.target.classList.add('active');
+            
+            // Либо через селектор по onclick
+            const buttons = document.querySelectorAll('.nav-btn');
+            buttons.forEach(btn => {
+                if (btn.getAttribute('onclick').includes(tabId)) {
+                    btn.classList.add('active');
+                }
+            });
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Обработка формы создания статьи
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            const title = document.getElementById('art-title').value.trim();
+            const category = document.getElementById('art-category').value;
+            const desc = document.getElementById('art-desc').value.trim();
+            const fullText = document.getElementById('art-full').value.trim();
+
+            const now = new Date();
+            const dateStr = String(now.getDate()).padStart(2, '0') + '.' + 
+                            String(now.getMonth() + 1).padStart(2, '0') + '.' + 
+                            now.getFullYear();
+
+            const newArticle = {
+                id: Date.now(),
+                title,
+                category,
+                date: dateStr,
+                desc,
+                fullText
+            };
+
+            const articles = getArticles();
+            articles.push(newArticle);
+            localStorage.setItem('astronova_articles', JSON.stringify(articles));
+
+            // Сброс формы и переключение на главную
+            document.getElementById('article-form').reset();
+            renderContent();
+            
+            // Переключаем на главную или новостную вкладку
+            switchTab(category === 'news' ? 'news' : 'astro');
+        }
+
+        // Открытие модального окна
+        function openArticle(id) {
+            const articles = getArticles();
+            const art = articles.find(a => a.id === id);
+            if (!art) return;
+
+            document.getElementById('modal-date').innerText = art.date;
+            document.getElementById('modal-title').innerText = art.title;
+            document.getElementById('modal-body').innerText = art.fullText;
+
+            document.getElementById('article-modal').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Закрытие модального окна
+        function closeModal() {
+            document.getElementById('article-modal').classList.remove('open');
+            document.body.style.overflow = 'auto';
+        }
+
+        function closeModalOutside(event) {
+            if (event.target.id === 'article-modal') {
+                closeModal();
+            }
+        }
+
+        // Инициализация при загрузке
+        window.onload = function() {
+            renderContent();
+        }
+    </script>
+</body>
+</html>
